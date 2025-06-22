@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   // バックエンドサーバーのベースURL
@@ -8,7 +9,7 @@ class ApiService {
   // 認証関連
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/auth/login/'),
+      Uri.parse('$baseUrl/userinfo/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -17,27 +18,37 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      // バックエンドは {"message": "Logged in successfully."} を返すが、
+      // トークンはCookieに設定される。モバイルアプリでは別の方法でトークンを取得する必要がある
+      final responseBody = jsonDecode(response.body);
+      
+      // 仮のトークンとユーザー情報を返す（実際の実装では適切な方法でトークンを取得する）
+      return {
+        'message': responseBody['message'],
+        'access_token': 'dummy_token', // 実際の実装では適切なトークンを取得
+        'user': {'email': email} // 実際の実装では適切なユーザー情報を取得
+      };
     } else {
       throw Exception('ログインに失敗しました');
     }
   }
 
-  Future<Map<String, dynamic>> register(String email, String password, String name) async {
+  Future<bool> register(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/auth/register/'),
+      Uri.parse('$baseUrl/register/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
         'password': password,
-        'name': name,
       }),
     );
 
     if (response.statusCode == 201) {
-      return jsonDecode(response.body);
+      debugPrint('登録成功: ${response.body}');
+      return true;
     } else {
-      throw Exception('登録に失敗しました');
+      debugPrint('登録失敗: ${response.body}');
+      return false;
     }
   }
 
