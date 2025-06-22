@@ -9,7 +9,7 @@ class ApiService {
   // 認証関連
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/userinfo/'),
+      Uri.parse('$baseUrl/token/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -54,7 +54,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getUserProfile(String token) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/auth/profile/'),
+      Uri.parse('$baseUrl/userinfo/'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
