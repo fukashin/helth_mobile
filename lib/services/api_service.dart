@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config/environment.dart';
 
 class ApiService {
-  // バックエンドサーバーのベースURL
-  static const String baseUrl = 'http://localhost:8000/api';
+  // バックエンドサーバーのベースURL（環境設定から取得）
+  static String get baseUrl => Environment.baseUrl;
 
   // 認証関連
   Future<Map<String, dynamic>> login(String email, String password) async {

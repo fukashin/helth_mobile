@@ -4,8 +4,18 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/health_data_provider.dart';
+import 'config/environment.dart';
 
 void main() {
+  // 環境設定の初期化
+  // コマンドライン引数から環境を取得（デフォルトは開発環境）
+  const String.fromEnvironment('ENV', defaultValue: 'dev') == 'prod' 
+    ? Environment.setEnvironment(Environment.prod)
+    : Environment.setEnvironment(Environment.dev);
+  
+  // 環境情報をデバッグ出力
+  Environment.printEnvironmentInfo();
+  
   runApp(const HealthApp());
 }
 
