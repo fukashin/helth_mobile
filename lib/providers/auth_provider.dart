@@ -2,20 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
+/// 認証状態管理プロバイダー
+///
+/// ユーザーの認証状態（ログイン状態、トークン、ユーザー情報）を管理します。
+/// ログイン、ユーザー登録、ログアウト機能を提供し、認証状態の永続化も行います。
 class AuthProvider with ChangeNotifier {
+  /// ユーザーが認証されているかどうか
   bool _isAuthenticated = false;
+  
+  /// 認証トークン
   String? _token;
+  
+  /// ユーザー情報
   Map<String, dynamic>? _user;
+  
+  /// 処理中かどうか（ログイン中、登録中など）
   bool _isLoading = false;
 
+  /// ユーザーが認証されているかどうかを取得
   bool get isAuthenticated => _isAuthenticated;
+  
+  /// 認証トークンを取得
   String? get token => _token;
+  
+  /// ユーザー情報を取得
   Map<String, dynamic>? get user => _user;
+  
+  /// 処理中かどうかを取得
   bool get isLoading => _isLoading;
 
+  /// APIサービスのインスタンス
   final ApiService _apiService = ApiService();
 
-  // デバッグ用のログ出力メソッド
+  /// デバッグ用のログ出力メソッド
+  ///
+  /// [action] 実行中のアクション名
+  /// [details] 詳細情報（任意）
+  /// [error] エラー情報（任意）
   void _debugLog(String action, {String? details, String? error}) {
     print('=== AuthProvider Debug Log ===');
     print('アクション: $action');
@@ -32,11 +55,18 @@ class AuthProvider with ChangeNotifier {
     print('=============================');
   }
 
+  /// コンストラクタ
+  ///
+  /// 初期化時に保存された認証状態を読み込みます。
   AuthProvider() {
     print('AuthProvider初期化開始');
     _loadAuthState();
   }
 
+  /// 保存された認証状態を読み込むメソッド
+  ///
+  /// SharedPreferencesから認証トークンを読み込み、
+  /// トークンが存在する場合はユーザー情報も取得します。
   Future<void> _loadAuthState() async {
     try {
       _debugLog('認証状態読み込み開始');
@@ -58,6 +88,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// ユーザー情報を取得するメソッド
+  ///
+  /// 認証トークンを使用してAPIからユーザー情報を取得します。
+  /// トークンが無効な場合はログアウトします。
   Future<void> _loadUserInfo() async {
     try {
       _debugLog('ユーザー情報取得開始');
@@ -71,6 +105,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// ログイン処理を行うメソッド
+  ///
+  /// [email] ユーザーのメールアドレス
+  /// [password] ユーザーのパスワード
+  ///
+  /// ログイン成功時はtrueを、失敗時はfalseを返します。
   Future<bool> login(String email, String password) async {
     _debugLog('ログイン開始', details: 'ユーザー: $email');
     _isLoading = true;
@@ -98,6 +138,14 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// ユーザー登録処理を行うメソッド
+  ///
+  /// [email] ユーザーのメールアドレス
+  /// [password] ユーザーのパスワード
+  /// [name] ユーザーの名前
+  ///
+  /// 登録成功時はtrueを、失敗時はfalseを返します。
+  /// 登録成功時は自動的にログインも行います。
   Future<bool> register(String email, String password, String name) async {
     _debugLog('ユーザー登録開始', details: 'ユーザー: $email, 名前: $name');
     _isLoading = true;
@@ -124,6 +172,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// ログアウト処理を行うメソッド
+  ///
+  /// 認証状態をクリアし、保存されたトークンを削除します。
   Future<void> logout() async {
     _debugLog('ログアウト開始');
     try {

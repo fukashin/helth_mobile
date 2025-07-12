@@ -2,22 +2,49 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/health_record.dart';
 
+/// 健康データ管理プロバイダー
+///
+/// ユーザーの健康データ（カロリー、体重、睡眠、運動）を管理します。
+/// APIからデータの取得と追加を行い、UIに変更を通知します。
 class HealthDataProvider with ChangeNotifier {
+  /// カロリー記録のリスト
   List<CalorieRecord> _calorieRecords = [];
+  
+  /// 体重記録のリスト
   List<WeightRecord> _weightRecords = [];
+  
+  /// 睡眠記録のリスト
   List<SleepRecord> _sleepRecords = [];
+  
+  /// 運動記録のリスト
   List<ExerciseRecord> _exerciseRecords = [];
+  
+  /// データ読み込み中かどうか
   bool _isLoading = false;
 
+  /// カロリー記録のリストを取得
   List<CalorieRecord> get calorieRecords => _calorieRecords;
+  
+  /// 体重記録のリストを取得
   List<WeightRecord> get weightRecords => _weightRecords;
+  
+  /// 睡眠記録のリストを取得
   List<SleepRecord> get sleepRecords => _sleepRecords;
+  
+  /// 運動記録のリストを取得
   List<ExerciseRecord> get exerciseRecords => _exerciseRecords;
+  
+  /// データ読み込み中かどうかを取得
   bool get isLoading => _isLoading;
 
+  /// APIサービスのインスタンス
   final ApiService _apiService = ApiService();
 
-  // デバッグ用のログ出力メソッド
+  /// デバッグ用のログ出力メソッド
+  ///
+  /// [action] 実行中のアクション名
+  /// [details] 詳細情報（任意）
+  /// [error] エラー情報（任意）
   void _debugLog(String action, {String? details, String? error}) {
     print('=== HealthDataProvider Debug Log ===');
     print('アクション: $action');
@@ -35,6 +62,11 @@ class HealthDataProvider with ChangeNotifier {
     print('===================================');
   }
 
+  /// 健康データを読み込むメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// APIから各種健康データ（カロリー、体重、睡眠、運動）を並行して取得します。
   Future<void> loadHealthData(String token) async {
     _debugLog('健康データ読み込み開始');
     _isLoading = true;
@@ -74,6 +106,12 @@ class HealthDataProvider with ChangeNotifier {
     }
   }
 
+  /// カロリー記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [record] 追加するカロリー記録
+  ///
+  /// APIにカロリー記録を送信し、成功した場合はローカルのリストに追加します。
   Future<void> addCalorieRecord(String token, CalorieRecord record) async {
     _debugLog('カロリー記録追加開始', details: 'カロリー: ${record.calories}kcal');
     try {
@@ -88,6 +126,12 @@ class HealthDataProvider with ChangeNotifier {
     }
   }
 
+  /// 体重記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [record] 追加する体重記録
+  ///
+  /// APIに体重記録を送信し、成功した場合はローカルのリストに追加します。
   Future<void> addWeightRecord(String token, WeightRecord record) async {
     _debugLog('体重記録追加開始', details: '体重: ${record.weight}kg');
     try {
@@ -102,6 +146,12 @@ class HealthDataProvider with ChangeNotifier {
     }
   }
 
+  /// 睡眠記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [record] 追加する睡眠記録
+  ///
+  /// APIに睡眠記録を送信し、成功した場合はローカルのリストに追加します。
   Future<void> addSleepRecord(String token, SleepRecord record) async {
     _debugLog('睡眠記録追加開始', details: '睡眠時間: ${record.hours}時間');
     try {
@@ -116,6 +166,12 @@ class HealthDataProvider with ChangeNotifier {
     }
   }
 
+  /// 運動記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [record] 追加する運動記録
+  ///
+  /// APIに運動記録を送信し、成功した場合はローカルのリストに追加します。
   Future<void> addExerciseRecord(String token, ExerciseRecord record) async {
     _debugLog('運動記録追加開始', details: '運動: ${record.exerciseType}, 時間: ${record.duration}分');
     try {

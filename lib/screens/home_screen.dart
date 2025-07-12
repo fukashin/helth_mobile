@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../providers/health_data_provider.dart';
+import '../widgets/weekly_calendar.dart';
+import '../widgets/daily_health_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -116,8 +118,27 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ダッシュボードタブ
-class DashboardTab extends StatelessWidget {
+class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
+
+  @override
+  State<DashboardTab> createState() => _DashboardTabState();
+}
+
+class _DashboardTabState extends State<DashboardTab> {
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+  }
+
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,92 +149,113 @@ class DashboardTab extends StatelessWidget {
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 挨拶
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.health_and_safety,
-                        size: 40,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Consumer<AuthProvider>(
-                              builder: (context, authProvider, child) {
-                                return Text(
-                                  'こんにちは、${authProvider.user?['name'] ?? 'ユーザー'}さん',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              },
-                            ),
-                            const Text(
-                              '今日も健康管理を頑張りましょう！',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.health_and_safety,
+                          size: 40,
+                          color: Colors.blue,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Consumer<AuthProvider>(
+                                builder: (context, authProvider, child) {
+                                  return Text(
+                                    'こんにちは、${authProvider.user?['name'] ?? 'ユーザー'}さん',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                },
+                              ),
+                              const Text(
+                                '今日も健康管理を頑張りましょう！',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
 
-              // 今日の記録サマリー
-              const Text(
-                '今日の記録',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              // 週間カレンダー
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: WeeklyCalendar(
+                  onDateSelected: _onDateSelected,
+                  initialSelectedDate: _selectedDate,
                 ),
               ),
-              const SizedBox(height: 8),
               
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                children: [
-                  _buildSummaryCard(
-                    '摂取カロリー',
-                    '${_getTodayCalories(healthDataProvider.calorieRecords)} kcal',
-                    Icons.restaurant,
-                    Colors.orange,
-                  ),
-                  _buildSummaryCard(
-                    '体重',
-                    '${_getLatestWeight(healthDataProvider.weightRecords)} kg',
-                    Icons.monitor_weight,
-                    Colors.green,
-                  ),
-                  _buildSummaryCard(
-                    '睡眠時間',
-                    '${_getTodaySleep(healthDataProvider.sleepRecords)} 時間',
-                    Icons.bedtime,
-                    Colors.purple,
-                  ),
-                  _buildSummaryCard(
-                    '運動時間',
-                    '${_getTodayExercise(healthDataProvider.exerciseRecords)} 分',
-                    Icons.fitness_center,
-                    Colors.red,
-                  ),
-                ],
+              // 選択された日付のデータ表示
+              DailyHealthData(selectedDate: _selectedDate),
+              
+              // 今日の記録サマリー
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '今日の記録サマリー',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      children: [
+                        _buildSummaryCard(
+                          '摂取カロリー',
+                          '${_getTodayCalories(healthDataProvider.calorieRecords)} kcal',
+                          Icons.restaurant,
+                          Colors.orange,
+                        ),
+                        _buildSummaryCard(
+                          '体重',
+                          '${_getLatestWeight(healthDataProvider.weightRecords)} kg',
+                          Icons.monitor_weight,
+                          Colors.green,
+                        ),
+                        _buildSummaryCard(
+                          '睡眠時間',
+                          '${_getTodaySleep(healthDataProvider.sleepRecords)} 時間',
+                          Icons.bedtime,
+                          Colors.purple,
+                        ),
+                        _buildSummaryCard(
+                          '運動時間',
+                          '${_getTodayExercise(healthDataProvider.exerciseRecords)} 分',
+                          Icons.fitness_center,
+                          Colors.red,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

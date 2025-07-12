@@ -3,11 +3,24 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../config/environment.dart';
 
+/// APIサービスクラス
+///
+/// バックエンドサーバーとの通信を担当し、認証や健康データの取得・追加などの
+/// API呼び出しを提供します。環境設定に基づいて適切なエンドポイントに接続します。
 class ApiService {
-  // バックエンドサーバーのベースURL（環境設定から取得）
+  /// バックエンドサーバーのベースURL（環境設定から取得）
   static String get baseUrl => Environment.baseUrl;
 
-  // デバッグ用のログ出力メソッド
+  /// デバッグ用のログ出力メソッド
+  ///
+  /// API呼び出しの詳細情報をコンソールに出力します。
+  ///
+  /// [method] HTTPメソッド（GET, POST, PUT, DELETEなど）
+  /// [endpoint] APIエンドポイント
+  /// [requestData] リクエストデータ（任意）
+  /// [statusCode] レスポンスのステータスコード（任意）
+  /// [responseBody] レスポンスのボディ（任意）
+  /// [error] エラー情報（任意）
   static void _debugLog(String method, String endpoint, {Map<String, dynamic>? requestData, int? statusCode, String? responseBody, String? error}) {
     print('=== API Debug Log ===');
     print('環境: ${Environment.currentEnvironment}');
@@ -28,7 +41,13 @@ class ApiService {
     print('==================');
   }
 
-  // 認証関連
+  /// ログイン処理を行うメソッド
+  ///
+  /// [email] ユーザーのメールアドレス
+  /// [password] ユーザーのパスワード
+  ///
+  /// 成功時はトークンとユーザー情報を含むMapを返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> login(String email, String password) async {
     final endpoint = '$baseUrl/token/';
     final requestData = {'email': email, 'password': password};
@@ -70,6 +89,12 @@ class ApiService {
     }
   }
 
+  /// ユーザー登録処理を行うメソッド
+  ///
+  /// [email] ユーザーのメールアドレス
+  /// [password] ユーザーのパスワード
+  ///
+  /// 成功時はtrueを、失敗時はfalseを返します。
   Future<bool> register(String email, String password) async {
     final endpoint = '$baseUrl/register/';
     final requestData = {'email': email, 'password': password};
@@ -100,6 +125,12 @@ class ApiService {
     }
   }
 
+  /// ユーザープロファイル情報を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// 成功時はユーザー情報を含むMapを返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> getUserProfile(String token) async {
     final endpoint = '$baseUrl/userinfo/';
     
@@ -132,7 +163,12 @@ class ApiService {
     }
   }
 
-  // カロリー記録関連
+  /// カロリー記録を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// 成功時はカロリー記録のリストを返します。
+  /// 失敗時は例外をスローします。
   Future<List<dynamic>> getCalorieRecords(String token) async {
     final endpoint = '$baseUrl/calories/';
     
@@ -165,6 +201,13 @@ class ApiService {
     }
   }
 
+  /// カロリー記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [data] 追加するカロリー記録データ
+  ///
+  /// 成功時は追加されたカロリー記録を返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addCalorieRecord(String token, Map<String, dynamic> data) async {
     final endpoint = '$baseUrl/calories/';
     
@@ -198,7 +241,12 @@ class ApiService {
     }
   }
 
-  // 体重記録関連
+  /// 体重記録を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// 成功時は体重記録のリストを返します。
+  /// 失敗時は例外をスローします。
   Future<List<dynamic>> getWeightRecords(String token) async {
     final endpoint = '$baseUrl/weight/';
     
@@ -231,6 +279,13 @@ class ApiService {
     }
   }
 
+  /// 体重記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [data] 追加する体重記録データ
+  ///
+  /// 成功時は追加された体重記録を返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addWeightRecord(String token, Map<String, dynamic> data) async {
     final endpoint = '$baseUrl/weight/';
     
@@ -264,7 +319,12 @@ class ApiService {
     }
   }
 
-  // 睡眠記録関連
+  /// 睡眠記録を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// 成功時は睡眠記録のリストを返します。
+  /// 失敗時は例外をスローします。
   Future<List<dynamic>> getSleepRecords(String token) async {
     final endpoint = '$baseUrl/sleep/';
     
@@ -297,6 +357,13 @@ class ApiService {
     }
   }
 
+  /// 睡眠記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [data] 追加する睡眠記録データ
+  ///
+  /// 成功時は追加された睡眠記録を返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addSleepRecord(String token, Map<String, dynamic> data) async {
     final endpoint = '$baseUrl/sleep/';
     
@@ -330,7 +397,12 @@ class ApiService {
     }
   }
 
-  // 運動記録関連
+  /// 運動記録を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  ///
+  /// 成功時は運動記録のリストを返します。
+  /// 失敗時は例外をスローします。
   Future<List<dynamic>> getExerciseRecords(String token) async {
     final endpoint = '$baseUrl/exercise/';
     
@@ -363,6 +435,13 @@ class ApiService {
     }
   }
 
+  /// 運動記録を追加するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [data] 追加する運動記録データ
+  ///
+  /// 成功時は追加された運動記録を返します。
+  /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addExerciseRecord(String token, Map<String, dynamic> data) async {
     final endpoint = '$baseUrl/exercise/';
     

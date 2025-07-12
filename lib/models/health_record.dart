@@ -1,7 +1,17 @@
+/// カロリー記録モデル
+///
+/// ユーザーの摂取カロリーを記録するためのモデルクラスです。
 class CalorieRecord {
+  /// 記録ID（APIから取得した場合に設定される）
   final int? id;
+  
+  /// 記録日
   final DateTime date;
+  
+  /// 摂取カロリー（kcal）
   final double calories;
+  
+  /// 説明（任意）
   final String? description;
 
   CalorieRecord({
@@ -11,6 +21,9 @@ class CalorieRecord {
     this.description,
   });
 
+  /// JSONからオブジェクトを生成するファクトリメソッド
+  ///
+  /// [json] APIから取得したJSONデータ
   factory CalorieRecord.fromJson(Map<String, dynamic> json) {
     return CalorieRecord(
       id: json['id'],
@@ -20,6 +33,9 @@ class CalorieRecord {
     );
   }
 
+  /// オブジェクトをJSON形式に変換するメソッド
+  ///
+  /// APIリクエスト用のJSONデータを返します。
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -30,10 +46,20 @@ class CalorieRecord {
   }
 }
 
+/// 体重記録モデル
+///
+/// ユーザーの体重を記録するためのモデルクラスです。
 class WeightRecord {
+  /// 記録ID（APIから取得した場合に設定される）
   final int? id;
+  
+  /// 記録日
   final DateTime date;
+  
+  /// 体重（kg）
   final double weight;
+  
+  /// メモ（任意）
   final String? notes;
 
   WeightRecord({
@@ -43,6 +69,9 @@ class WeightRecord {
     this.notes,
   });
 
+  /// JSONからオブジェクトを生成するファクトリメソッド
+  ///
+  /// [json] APIから取得したJSONデータ
   factory WeightRecord.fromJson(Map<String, dynamic> json) {
     return WeightRecord(
       id: json['id'],
@@ -52,6 +81,9 @@ class WeightRecord {
     );
   }
 
+  /// オブジェクトをJSON形式に変換するメソッド
+  ///
+  /// APIリクエスト用のJSONデータを返します。
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -62,11 +94,23 @@ class WeightRecord {
   }
 }
 
+/// 睡眠記録モデル
+///
+/// ユーザーの睡眠時間を記録するためのモデルクラスです。
 class SleepRecord {
+  /// 記録ID（APIから取得した場合に設定される）
   final int? id;
+  
+  /// 記録日
   final DateTime date;
+  
+  /// 睡眠時間（時間）
   final double hours;
+  
+  /// 睡眠の質（任意）
   final String? quality;
+  
+  /// メモ（任意）
   final String? notes;
 
   SleepRecord({
@@ -77,6 +121,9 @@ class SleepRecord {
     this.notes,
   });
 
+  /// JSONからオブジェクトを生成するファクトリメソッド
+  ///
+  /// [json] APIから取得したJSONデータ
   factory SleepRecord.fromJson(Map<String, dynamic> json) {
     return SleepRecord(
       id: json['id'],
@@ -87,6 +134,9 @@ class SleepRecord {
     );
   }
 
+  /// オブジェクトをJSON形式に変換するメソッド
+  ///
+  /// APIリクエスト用のJSONデータを返します。
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -98,12 +148,26 @@ class SleepRecord {
   }
 }
 
+/// 運動記録モデル
+///
+/// ユーザーの運動を記録するためのモデルクラスです。
 class ExerciseRecord {
+  /// 記録ID（APIから取得した場合に設定される）
   final int? id;
+  
+  /// 記録日
   final DateTime date;
+  
+  /// 運動の種類
   final String exerciseType;
+  
+  /// 運動時間（分）
   final double duration;
+  
+  /// 消費カロリー（kcal、任意）
   final double? calories;
+  
+  /// メモ（任意）
   final String? notes;
 
   ExerciseRecord({
@@ -115,6 +179,9 @@ class ExerciseRecord {
     this.notes,
   });
 
+  /// JSONからオブジェクトを生成するファクトリメソッド
+  ///
+  /// [json] APIから取得したJSONデータ
   factory ExerciseRecord.fromJson(Map<String, dynamic> json) {
     return ExerciseRecord(
       id: json['id'],
@@ -126,6 +193,9 @@ class ExerciseRecord {
     );
   }
 
+  /// オブジェクトをJSON形式に変換するメソッド
+  ///
+  /// APIリクエスト用のJSONデータを返します。
   Map<String, dynamic> toJson() {
     return {
       'id': id,
