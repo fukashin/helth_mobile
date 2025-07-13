@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../providers/health_data_provider.dart';
 import '../widgets/weekly_calendar.dart';
 import '../widgets/daily_health_data.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -360,44 +361,370 @@ class StatisticsTab extends StatelessWidget {
   }
 }
 
-// プロフィールタブ（プレースホルダー）
-class ProfileTab extends StatelessWidget {
+// プロフィールタブ
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
+
+  @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+  final _formKey = GlobalKey<FormState>();
+  
+  // プロフィール情報
+  String _name = '';
+  String _nickname = '';
+  double _height = 0.0;
+  double _weight = 0.0;
+  String _goal = '';
+  
+  // プロフィール読み込み中フラグ
+  bool _isLoading = true;
+  
+  // プロフィール更新中フラグ
+  bool _isUpdating = false;
+  
+  // エラーメッセージ
+  String? _errorMessage;
+  
+  // 成功メッセージ
+  String? _successMessage;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+  
+  // プロフィール情報を読み込む
+  Future<void> _loadProfileData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.token == null || authProvider.userId == null) {
+        setState(() {
+          _errorMessage = 'ログインが必要です';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      final apiService = ApiService();
+      final profileData = await apiService.getUserProfileDetails(
+        authProvider.token!,
+        authProvider.userId!,
+      );
+      
+      setState(() {
+        _name = profileData['name'] ?? '';
+        _nickname = profileData['nickname'] ?? '';
+        _height = (profileData['height'] ?? 0.0).toDouble();
+        _weight = (profileData['weight'] ?? 0.0).toDouble();
+        _goal = profileData['goal'] ?? '';
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'プロフィール情報の取得に失敗しました: $e';
+        _isLoading = false;
+      });
+    }
+  }
+  
+  // プロフィール情報を更新する
+  Future<void> _updateProfile() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    
+    _formKey.currentState!.save();
+    
+    setState(() {
+      _isUpdating = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+    
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.token == null || authProvider.userId == null) {
+        setState(() {
+          _errorMessage = 'ログインが必要です';
+          _isUpdating = false;
+        });
+        return;
+      }
+      
+      final apiService = ApiService();
+      await apiService.updateUserProfile(
+        authProvider.token!,
+        authProvider.userId!,
+        {
+          'name': _name,
+          'nickname': _nickname,
+          'height': _height,
+          'weight': _weight,
+          'goal': _goal,
+        },
+      );
+      
+      setState(() {
+        _successMessage = 'プロフィールを更新しました';
+        _isUpdating = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'プロフィールの更新に失敗しました: $e';
+        _isUpdating = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        return Center(
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.person,
-                size: 80,
-                color: Colors.blue,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                authProvider.user?['name'] ?? 'ユーザー',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              // ヘッダー部分
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.person,
+                      size: 80,
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      authProvider.user?['name'] ?? 'ユーザー',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      authProvider.user?['email'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                authProvider.user?['email'] ?? '',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              
+              // 読み込み中表示
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'プロフィール編集機能は今後実装予定です',
-                style: TextStyle(fontSize: 16),
-              ),
+                
+              // エラーメッセージ
+              if (_errorMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade100,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    _errorMessage!,
+                    style: TextStyle(color: Colors.red.shade900),
+                  ),
+                ),
+                
+              // 成功メッセージ
+              if (_successMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    _successMessage!,
+                    style: TextStyle(color: Colors.green.shade900),
+                  ),
+                ),
+              
+              // プロフィール編集フォーム
+              if (!_isLoading)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'プロフィール編集',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // 名前
+                          TextFormField(
+                            initialValue: _name,
+                            decoration: const InputDecoration(
+                              labelText: '名前',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '名前を入力してください';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _name = value ?? '';
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // ニックネーム
+                          TextFormField(
+                            initialValue: _nickname,
+                            decoration: const InputDecoration(
+                              labelText: 'ニックネーム',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.face),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'ニックネームを入力してください';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _nickname = value ?? '';
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // 身長
+                          TextFormField(
+                            initialValue: _height > 0 ? _height.toString() : '',
+                            decoration: const InputDecoration(
+                              labelText: '身長 (cm)',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.height),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '身長を入力してください';
+                              }
+                              if (double.tryParse(value) == null) {
+                                return '数値を入力してください';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _height = double.tryParse(value ?? '0') ?? 0.0;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // 体重
+                          TextFormField(
+                            initialValue: _weight > 0 ? _weight.toString() : '',
+                            decoration: const InputDecoration(
+                              labelText: '体重 (kg)',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.monitor_weight),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '体重を入力してください';
+                              }
+                              if (double.tryParse(value) == null) {
+                                return '数値を入力してください';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _weight = double.tryParse(value ?? '0') ?? 0.0;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // 目標
+                          TextFormField(
+                            initialValue: _goal,
+                            decoration: const InputDecoration(
+                              labelText: '目標',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.flag),
+                            ),
+                            maxLines: 3,
+                            onSaved: (value) {
+                              _goal = value ?? '';
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // メールアドレス（変更不可）
+                          TextFormField(
+                            initialValue: authProvider.user?['email'] ?? '',
+                            decoration: const InputDecoration(
+                              labelText: 'メールアドレス（変更不可）',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.email),
+                              filled: true,
+                              fillColor: Color(0xFFEEEEEE),
+                            ),
+                            enabled: false,
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          // 更新ボタン
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: _isUpdating ? null : _updateProfile,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: _isUpdating
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('プロフィールを更新'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         );

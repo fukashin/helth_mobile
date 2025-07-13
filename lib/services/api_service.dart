@@ -175,6 +175,86 @@ class ApiService {
     }
   }
 
+  /// ユーザープロファイル詳細情報を取得するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [userId] ユーザーID
+  ///
+  /// 成功時はユーザープロファイル情報を含むMapを返します。
+  /// 失敗時は例外をスローします。
+  Future<Map<String, dynamic>> getUserProfileDetails(String token, int userId) async {
+    final endpoint = '$baseUrl/user-profiles/$userId/';
+    
+    try {
+      _debugLog('GET', endpoint);
+      
+      final response = await http.get(
+        Uri.parse(endpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      _debugLog('GET', endpoint, statusCode: response.statusCode, responseBody: response.body);
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        print('プロフィール詳細取得成功');
+        return result;
+      } else {
+        final errorMessage = 'プロフィール詳細取得に失敗しました (ステータス: ${response.statusCode})';
+        _debugLog('GET', endpoint, error: errorMessage);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final errorMessage = 'プロフィール詳細取得処理でエラーが発生しました: $e';
+      _debugLog('GET', endpoint, error: errorMessage);
+      throw Exception(errorMessage);
+    }
+  }
+
+  /// ユーザープロファイルを更新するメソッド
+  ///
+  /// [token] 認証トークン
+  /// [userId] ユーザーID
+  /// [data] 更新するプロファイルデータ
+  ///
+  /// 成功時は更新されたプロファイル情報を返します。
+  /// 失敗時は例外をスローします。
+  Future<Map<String, dynamic>> updateUserProfile(String token, int userId, Map<String, dynamic> data) async {
+    final endpoint = '$baseUrl/user-profiles/$userId/';
+    
+    try {
+      _debugLog('PATCH', endpoint, requestData: data);
+      
+      final response = await http.patch(
+        Uri.parse(endpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      _debugLog('PATCH', endpoint, statusCode: response.statusCode, responseBody: response.body);
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        print('プロフィール更新成功');
+        return result;
+      } else {
+        final errorMessage = 'プロフィール更新に失敗しました (ステータス: ${response.statusCode})';
+        _debugLog('PATCH', endpoint, error: errorMessage);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final errorMessage = 'プロフィール更新処理でエラーが発生しました: $e';
+      _debugLog('PATCH', endpoint, error: errorMessage);
+      throw Exception(errorMessage);
+    }
+  }
+
   /// カロリー記録を取得するメソッド
   ///
   /// [token] 認証トークン
