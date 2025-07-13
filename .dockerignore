@@ -1,0 +1,23 @@
+# Flutter build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+ios/
+android/
+macos/
+windows/
+linux/
+
+# IDE / Editor
+.idea/
+.vscode/
+
+# Version control
+.git/
+.gitignore
+
+# その他
+*.lock
+*.iml
