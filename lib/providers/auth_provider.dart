@@ -16,6 +16,9 @@ class AuthProvider with ChangeNotifier {
   /// ユーザー情報
   Map<String, dynamic>? _user;
   
+  /// ユーザーID
+  int? _userId;
+  
   /// 処理中かどうか（ログイン中、登録中など）
   bool _isLoading = false;
 
@@ -27,6 +30,9 @@ class AuthProvider with ChangeNotifier {
   
   /// ユーザー情報を取得
   Map<String, dynamic>? get user => _user;
+  
+  /// ユーザーIDを取得
+  int? get userId => _userId;
   
   /// 処理中かどうかを取得
   bool get isLoading => _isLoading;
@@ -72,6 +78,7 @@ class AuthProvider with ChangeNotifier {
       _debugLog('認証状態読み込み開始');
       final prefs = await SharedPreferences.getInstance();
       _token = prefs.getString('auth_token');
+      _userId = prefs.getInt('user_id');
       if (_token != null) {
         _isAuthenticated = true;
         _debugLog('保存されたトークンを発見', details: 'ユーザー情報を取得します');
@@ -97,6 +104,16 @@ class AuthProvider with ChangeNotifier {
       _debugLog('ユーザー情報取得開始');
       final userInfo = await _apiService.getUserProfile(_token!);
       _user = userInfo;
+      
+      // ユーザーIDを取得して保存
+      if (_user != null && _user!['id'] != null) {
+        _userId = _user!['id'];
+        // ユーザーIDをローカルストレージに保存
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('user_id', _userId!);
+        _debugLog('ユーザーID取得成功', details: 'ユーザーID: $_userId');
+      }
+      
       _debugLog('ユーザー情報取得成功', details: 'ユーザー: ${_user!['email'] ?? "不明"}');
     } catch (e) {
       _debugLog('ユーザー情報取得失敗', error: e.toString(), details: 'トークンが無効な可能性があります。ログアウトします。');
@@ -122,9 +139,18 @@ class AuthProvider with ChangeNotifier {
       _user = response['user'];
       _isAuthenticated = true;
 
-      // トークンを保存
+      // ユーザーIDを取得
+      if (_user != null && _user!['id'] != null) {
+        _userId = _user!['id'];
+      }
+      
+      // トークンとユーザーIDを保存
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', _token!);
+      if (_userId != null) {
+        await prefs.setInt('user_id', _userId!);
+        _debugLog('ユーザーID保存', details: 'ユーザーID: $_userId');
+      }
 
       _isLoading = false;
       notifyListeners();
@@ -162,9 +188,18 @@ class AuthProvider with ChangeNotifier {
         _user = response['user'];
         _isAuthenticated = true;
 
-        // トークンを保存
+        // ユーザーIDを取得
+        if (_user != null && _user!['id'] != null) {
+          _userId = _user!['id'];
+        }
+        
+        // トークンとユーザーIDを保存
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
+        if (_userId != null) {
+          await prefs.setInt('user_id', _userId!);
+          _debugLog('ユーザーID保存', details: 'ユーザーID: $_userId');
+        }
 
         _isLoading = false;
         notifyListeners();
@@ -193,13 +228,15 @@ class AuthProvider with ChangeNotifier {
       _isAuthenticated = false;
       _token = null;
       _user = null;
+      _userId = null;
 
-      // 保存されたトークンを削除
+      // 保存されたトークンとユーザーIDを削除
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_token');
+      await prefs.remove('user_id');
 
       notifyListeners();
-      _debugLog('ログアウト完了', details: 'トークンとユーザー情報を削除しました');
+      _debugLog('ログアウト完了', details: 'トークン、ユーザー情報、ユーザーIDを削除しました');
     } catch (e) {
       _debugLog('ログアウトエラー', error: e.toString());
       notifyListeners();
