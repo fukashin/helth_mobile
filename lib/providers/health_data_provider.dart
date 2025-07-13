@@ -36,6 +36,11 @@ class HealthDataProvider with ChangeNotifier {
   
   /// データ読み込み中かどうかを取得
   bool get isLoading => _isLoading;
+  
+  /// 日付ごとの健康データを取得
+  /// 
+  /// 全ての健康データを日付ごとにまとめて返します。
+  Map<String, DailyHealthData> get dailyHealthData => _getDailyHealthData();
 
   /// APIサービスのインスタンス
   final ApiService _apiService = ApiService();
@@ -104,6 +109,102 @@ class HealthDataProvider with ChangeNotifier {
       _debugLog('健康データ読み込み失敗', error: e.toString());
       rethrow;
     }
+  }
+  
+  /// 日付ごとの健康データを取得するメソッド
+  /// 
+  /// 全ての健康データ（カロリー、体重、睡眠、運動）を日付ごとにまとめます。
+  Map<String, DailyHealthData> _getDailyHealthData() {
+    final Map<String, DailyHealthData> dailyData = {};
+    
+    // 日付のフォーマット（YYYY-MM-DD）を取得する関数
+    String getDateKey(DateTime date) {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
+    
+    // 体重記録を処理
+    for (final record in _weightRecords) {
+      final dateKey = getDateKey(record.date);
+      if (!dailyData.containsKey(dateKey)) {
+        dailyData[dateKey] = DailyHealthData(date: record.date);
+      }
+      dailyData[dateKey] = DailyHealthData(
+        date: record.date,
+        weight: record.weight,
+        calories: dailyData[dateKey]?.calories,
+        sleep: dailyData[dateKey]?.sleep,
+        exercise: dailyData[dateKey]?.exercise,
+        exerciseType: dailyData[dateKey]?.exerciseType,
+      );
+    }
+    
+    // カロリー記録を処理
+    for (final record in _calorieRecords) {
+      final dateKey = getDateKey(record.date);
+      if (!dailyData.containsKey(dateKey)) {
+        dailyData[dateKey] = DailyHealthData(date: record.date);
+      }
+      
+      // 既存のカロリー値があれば加算、なければ新規設定
+      final existingCalories = dailyData[dateKey]?.calories ?? 0;
+      
+      dailyData[dateKey] = DailyHealthData(
+        date: record.date,
+        weight: dailyData[dateKey]?.weight,
+        calories: existingCalories + record.calories,
+        sleep: dailyData[dateKey]?.sleep,
+        exercise: dailyData[dateKey]?.exercise,
+        exerciseType: dailyData[dateKey]?.exerciseType,
+      );
+    }
+    
+    // 睡眠記録を処理
+    for (final record in _sleepRecords) {
+      final dateKey = getDateKey(record.date);
+      if (!dailyData.containsKey(dateKey)) {
+        dailyData[dateKey] = DailyHealthData(date: record.date);
+      }
+      dailyData[dateKey] = DailyHealthData(
+        date: record.date,
+        weight: dailyData[dateKey]?.weight,
+        calories: dailyData[dateKey]?.calories,
+        sleep: record.hours,
+        exercise: dailyData[dateKey]?.exercise,
+        exerciseType: dailyData[dateKey]?.exerciseType,
+      );
+    }
+    
+    // 運動記録を処理
+    for (final record in _exerciseRecords) {
+      final dateKey = getDateKey(record.date);
+      if (!dailyData.containsKey(dateKey)) {
+        dailyData[dateKey] = DailyHealthData(date: record.date);
+      }
+      
+      // 既存の運動時間があれば加算、なければ新規設定
+      final existingExercise = dailyData[dateKey]?.exercise ?? 0;
+      
+      dailyData[dateKey] = DailyHealthData(
+        date: record.date,
+        weight: dailyData[dateKey]?.weight,
+        calories: dailyData[dateKey]?.calories,
+        sleep: dailyData[dateKey]?.sleep,
+        exercise: existingExercise + record.duration,
+        exerciseType: record.exerciseType, // 最後の運動タイプを使用
+      );
+    }
+    
+    return dailyData;
+  }
+  
+  /// 特定の日付の健康データを取得するメソッド
+  /// 
+  /// [date] 取得する日付
+  /// 
+  /// 指定された日付の健康データを返します。データがない場合はnullを返します。
+  DailyHealthData? getDailyHealthDataForDate(DateTime date) {
+    final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return dailyHealthData[dateKey];
   }
 
   /// カロリー記録を追加するメソッド

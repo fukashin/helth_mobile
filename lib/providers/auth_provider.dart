@@ -152,12 +152,24 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final bool isSuccess = await _apiService.register(email, password);
+      final response = await _apiService.register(email, password);
 
-      if (isSuccess) {
-        _debugLog('ユーザー登録成功', details: 'ユーザー: $email, 自動ログインを実行します');
-        // 登録に成功したら、そのままログインする
-        return await login(email, password);
+      if (response != false) {
+        _debugLog('ユーザー登録成功', details: 'ユーザー: $email, トークンを取得しました');
+        
+        // レスポンスからトークンとユーザー情報を取得
+        _token = response['access_token'];
+        _user = response['user'];
+        _isAuthenticated = true;
+
+        // トークンを保存
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', _token!);
+
+        _isLoading = false;
+        notifyListeners();
+        _debugLog('ユーザー登録・ログイン完了', details: 'ユーザー: $email, トークンを保存しました');
+        return true;
       } else {
         _isLoading = false;
         notifyListeners();

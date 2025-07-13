@@ -64,15 +64,15 @@ class ApiService {
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
 
       if (response.statusCode == 200) {
-        // バックエンドは {"message": "Logged in successfully."} を返すが、
-        // トークンはCookieに設定される。モバイルアプリでは別の方法でトークンを取得する必要がある
+        // レスポンスボディからトークンとユーザー情報を取得
         final responseBody = jsonDecode(response.body);
         
-        // 仮のトークンとユーザー情報を返す（実際の実装では適切な方法でトークンを取得する）
+        // APIレスポンスから直接トークンとユーザー情報を取得
         final result = {
           'message': responseBody['message'],
-          'access_token': 'dummy_token', // 実際の実装では適切なトークンを取得
-          'user': {'email': email} // 実際の実装では適切なユーザー情報を取得
+          'access_token': responseBody['access_token'],
+          'refresh_token': responseBody['refresh_token'],
+          'user': responseBody['user']
         };
         
         print('ログイン成功: $email');
@@ -94,8 +94,9 @@ class ApiService {
   /// [email] ユーザーのメールアドレス
   /// [password] ユーザーのパスワード
   ///
-  /// 成功時はtrueを、失敗時はfalseを返します。
-  Future<bool> register(String email, String password) async {
+  /// 成功時はトークンとユーザー情報を含むMapを返します。
+  /// 失敗時はfalseを返します。
+  Future<dynamic> register(String email, String password) async {
     final endpoint = '$baseUrl/register/';
     final requestData = {'email': email, 'password': password};
     
@@ -111,8 +112,19 @@ class ApiService {
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
 
       if (response.statusCode == 201) {
+        // レスポンスボディからトークンとユーザー情報を取得
+        final responseBody = jsonDecode(response.body);
+        
+        // APIレスポンスから直接トークンとユーザー情報を取得
+        final result = {
+          'message': responseBody['message'],
+          'access_token': responseBody['access_token'],
+          'refresh_token': responseBody['refresh_token'],
+          'user': responseBody['user']
+        };
+        
         print('登録成功: $email');
-        return true;
+        return result;
       } else {
         print('登録失敗: $email (ステータス: ${response.statusCode})');
         return false;

@@ -207,3 +207,35 @@ class ExerciseRecord {
     };
   }
 }
+
+/// 日別健康データモデル
+///
+/// 特定の日付の健康データ（体重、カロリー、睡眠、運動）をまとめて管理するクラスです。
+class DailyHealthData {
+  /// 記録日
+  final DateTime date;
+  
+  /// 体重（kg、任意）
+  final double? weight;
+  
+  /// 摂取カロリー（kcal、任意）
+  final double? calories;
+  
+  /// 睡眠時間（時間、任意）
+  final double? sleep;
+  
+  /// 運動時間（分、任意）
+  final double? exercise;
+  
+  /// 運動の種類（任意）
+  final String? exerciseType;
+
+  DailyHealthData({
+    required this.date,
+    this.weight,
+    this.calories,
+    this.sleep,
+    this.exercise,
+    this.exerciseType,
+  });
+}

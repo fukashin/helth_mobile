@@ -25,10 +25,7 @@ class DailyHealthData extends StatelessWidget {
         }
 
         // 選択された日付のデータを取得
-        final calorieData = _getCalorieDataForDate(healthDataProvider.calorieRecords, selectedDate);
-        final weightData = _getWeightDataForDate(healthDataProvider.weightRecords, selectedDate);
-        final sleepData = _getSleepDataForDate(healthDataProvider.sleepRecords, selectedDate);
-        final exerciseData = _getExerciseDataForDate(healthDataProvider.exerciseRecords, selectedDate);
+        final dailyData = healthDataProvider.getDailyHealthDataForDate(selectedDate);
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -47,7 +44,7 @@ class DailyHealthData extends StatelessWidget {
               // 健康データのカード
               _buildDataCard(
                 title: '摂取カロリー',
-                value: calorieData != null ? '${calorieData.calories} kcal' : '記録なし',
+                value: dailyData?.calories != null ? '${dailyData!.calories} kcal' : '記録なし',
                 icon: Icons.restaurant,
                 color: Colors.orange,
               ),
@@ -55,7 +52,7 @@ class DailyHealthData extends StatelessWidget {
               
               _buildDataCard(
                 title: '体重',
-                value: weightData != null ? '${weightData.weight} kg' : '記録なし',
+                value: dailyData?.weight != null ? '${dailyData!.weight} kg' : '記録なし',
                 icon: Icons.monitor_weight,
                 color: Colors.green,
               ),
@@ -63,7 +60,7 @@ class DailyHealthData extends StatelessWidget {
               
               _buildDataCard(
                 title: '睡眠時間',
-                value: sleepData != null ? '${sleepData.hours} 時間' : '記録なし',
+                value: dailyData?.sleep != null ? '${dailyData!.sleep} 時間' : '記録なし',
                 icon: Icons.bedtime,
                 color: Colors.purple,
               ),
@@ -71,8 +68,8 @@ class DailyHealthData extends StatelessWidget {
               
               _buildDataCard(
                 title: '運動時間',
-                value: exerciseData != null 
-                  ? '${exerciseData.duration} 分 (${exerciseData.exerciseType})' 
+                value: dailyData?.exercise != null 
+                  ? '${dailyData!.exercise} 分${dailyData.exerciseType != null ? " (${dailyData.exerciseType})" : ""}' 
                   : '記録なし',
                 icon: Icons.fitness_center,
                 color: Colors.red,
@@ -131,75 +128,5 @@ class DailyHealthData extends StatelessWidget {
     );
   }
 
-  /// 選択された日付のカロリーデータを取得するメソッド
-  ///
-  /// [records] カロリー記録のリスト
-  /// [date] 検索する日付
-  ///
-  /// 指定された日付のカロリー記録を返します。見つからない場合はnullを返します。
-  CalorieRecord? _getCalorieDataForDate(List<CalorieRecord> records, DateTime date) {
-    try {
-      return records.firstWhere((record) => 
-        record.date.year == date.year &&
-        record.date.month == date.month &&
-        record.date.day == date.day
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 選択された日付の体重データを取得するメソッド
-  ///
-  /// [records] 体重記録のリスト
-  /// [date] 検索する日付
-  ///
-  /// 指定された日付の体重記録を返します。見つからない場合はnullを返します。
-  WeightRecord? _getWeightDataForDate(List<WeightRecord> records, DateTime date) {
-    try {
-      return records.firstWhere((record) => 
-        record.date.year == date.year &&
-        record.date.month == date.month &&
-        record.date.day == date.day
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 選択された日付の睡眠データを取得するメソッド
-  ///
-  /// [records] 睡眠記録のリスト
-  /// [date] 検索する日付
-  ///
-  /// 指定された日付の睡眠記録を返します。見つからない場合はnullを返します。
-  SleepRecord? _getSleepDataForDate(List<SleepRecord> records, DateTime date) {
-    try {
-      return records.firstWhere((record) => 
-        record.date.year == date.year &&
-        record.date.month == date.month &&
-        record.date.day == date.day
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 選択された日付の運動データを取得するメソッド
-  ///
-  /// [records] 運動記録のリスト
-  /// [date] 検索する日付
-  ///
-  /// 指定された日付の運動記録を返します。見つからない場合はnullを返します。
-  ExerciseRecord? _getExerciseDataForDate(List<ExerciseRecord> records, DateTime date) {
-    try {
-      return records.firstWhere((record) => 
-        record.date.year == date.year &&
-        record.date.month == date.month &&
-        record.date.day == date.day
-      );
-    } catch (e) {
-      return null;
-    }
-  }
+  // 個別のデータ取得メソッドは不要になったため削除
 }
