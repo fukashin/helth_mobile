@@ -1,0 +1,7 @@
+@echo off
+echo ================================
+echo Web開発環境でアプリを起動します
+echo 接続先: http://localhost:8000/api
+echo ホットリロードを有効にしています
+echo ================================
+flutter run -d chrome --web-port=8080 --dart-define=ENV=web --hot

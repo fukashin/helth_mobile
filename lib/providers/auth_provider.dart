@@ -21,6 +21,9 @@ class AuthProvider with ChangeNotifier {
   
   /// 処理中かどうか（ログイン中、登録中など）
   bool _isLoading = false;
+  
+  /// 初期化が完了したかどうか
+  bool _isInitialized = false;
 
   /// ユーザーが認証されているかどうかを取得
   bool get isAuthenticated => _isAuthenticated;
@@ -36,6 +39,9 @@ class AuthProvider with ChangeNotifier {
   
   /// 処理中かどうかを取得
   bool get isLoading => _isLoading;
+  
+  /// 初期化が完了したかどうかを取得
+  bool get isInitialized => _isInitialized;
 
   /// APIサービスのインスタンス
   final ApiService _apiService = ApiService();
@@ -83,14 +89,24 @@ class AuthProvider with ChangeNotifier {
         _isAuthenticated = true;
         _debugLog('保存されたトークンを発見', details: 'ユーザー情報を取得します');
         // ユーザー情報を取得
-        await _loadUserInfo();
+        try {
+          await _loadUserInfo();
+        } catch (e) {
+          _debugLog('ユーザー情報取得エラー', error: e.toString(), details: 'トークンは保持したまま続行します');
+          // ユーザー情報取得に失敗しても、トークンがあれば認証状態を維持
+          _isAuthenticated = true;
+        }
       } else {
         _debugLog('保存されたトークンなし', details: '未認証状態で開始');
       }
+      // 初期化完了フラグをセット
+      _isInitialized = true;
       notifyListeners();
       _debugLog('認証状態読み込み完了');
     } catch (e) {
       _debugLog('認証状態読み込みエラー', error: e.toString());
+      // エラーが発生しても初期化完了フラグをセット
+      _isInitialized = true;
       notifyListeners();
     }
   }
@@ -116,9 +132,9 @@ class AuthProvider with ChangeNotifier {
       
       _debugLog('ユーザー情報取得成功', details: 'ユーザー: ${_user!['email'] ?? "不明"}');
     } catch (e) {
-      _debugLog('ユーザー情報取得失敗', error: e.toString(), details: 'トークンが無効な可能性があります。ログアウトします。');
-      // トークンが無効な場合はログアウト
-      await logout();
+      _debugLog('ユーザー情報取得失敗', error: e.toString(), details: 'APIリクエストに失敗しました');
+      // Webモードでのリロード時はエラーを上位に伝播させる
+      throw e;
     }
   }
 

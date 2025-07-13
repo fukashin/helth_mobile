@@ -262,7 +262,7 @@ class ApiService {
   /// 成功時はカロリー記録のリストを返します。
   /// 失敗時は例外をスローします。
   Future<List<dynamic>> getCalorieRecords(String token) async {
-    final endpoint = '$baseUrl/calories/';
+    final endpoint = '$baseUrl/calorie-records/';
     
     try {
       _debugLog('GET', endpoint);
@@ -301,7 +301,7 @@ class ApiService {
   /// 成功時は追加されたカロリー記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addCalorieRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/calories/';
+    final endpoint = '$baseUrl/calorie-records/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -340,7 +340,7 @@ class ApiService {
   /// 成功時は体重記録のリストを返します。
   /// 失敗時は例外をスローします。
   Future<List<dynamic>> getWeightRecords(String token) async {
-    final endpoint = '$baseUrl/weight/';
+    final endpoint = '$baseUrl/weight-records/';
     
     try {
       _debugLog('GET', endpoint);
@@ -379,7 +379,7 @@ class ApiService {
   /// 成功時は追加された体重記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addWeightRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/weight/';
+    final endpoint = '$baseUrl/weight-records/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -418,7 +418,7 @@ class ApiService {
   /// 成功時は睡眠記録のリストを返します。
   /// 失敗時は例外をスローします。
   Future<List<dynamic>> getSleepRecords(String token) async {
-    final endpoint = '$baseUrl/sleep/';
+    final endpoint = '$baseUrl/sleep-records/';
     
     try {
       _debugLog('GET', endpoint);
@@ -457,7 +457,7 @@ class ApiService {
   /// 成功時は追加された睡眠記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addSleepRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/sleep/';
+    final endpoint = '$baseUrl/sleep-records/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -496,7 +496,7 @@ class ApiService {
   /// 成功時は運動記録のリストを返します。
   /// 失敗時は例外をスローします。
   Future<List<dynamic>> getExerciseRecords(String token) async {
-    final endpoint = '$baseUrl/exercise/';
+    final endpoint = '$baseUrl/exercise-records/';
     
     try {
       _debugLog('GET', endpoint);
@@ -535,7 +535,7 @@ class ApiService {
   /// 成功時は追加された運動記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addExerciseRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/exercise/';
+    final endpoint = '$baseUrl/exercise-records/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);

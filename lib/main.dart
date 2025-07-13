@@ -77,6 +77,23 @@ class HealthApp extends StatelessWidget {
         // 認証状態に基づいて表示する画面を切り替え
         home: Consumer<AuthProvider>(
           builder: (context, authProvider, child) {
+            // 初期化が完了していない場合はローディング画面を表示
+            if (!authProvider.isInitialized) {
+              return const Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('読み込み中...', style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ),
+              );
+            }
+            
+            // 初期化完了後、認証状態に基づいて画面を切り替え
             if (authProvider.isAuthenticated) {
               return const HomeScreen(); // 認証済みの場合はホーム画面
             } else {
