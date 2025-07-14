@@ -253,8 +253,9 @@ class ApiService {
         print('プロフィール更新成功');
         return result;
       } else {
-        final errorMessage = 'プロフィール更新に失敗しました (ステータス: ${response.statusCode})';
-        _debugLog('PATCH', endpoint, error: errorMessage);
+        final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        final errorMessage = errorBody['detail'] ?? 'プロフィール更新に失敗しました (ステータス: ${response.statusCode})';
+        _debugLog('PATCH', endpoint, error: errorMessage, responseBody: response.body);
         throw Exception(errorMessage);
       }
     } catch (e) {
