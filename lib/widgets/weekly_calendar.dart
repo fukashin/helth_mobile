@@ -178,17 +178,21 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                         ),
                         if (isToday && !isSelected)
                           Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            margin: const EdgeInsets.only(top: 2),
+                            width: 24,
+                            height: 12,
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
-                              '今日',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 10,
+                            child: const Center(
+                              child: Text(
+                                '今日',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),

@@ -154,46 +154,46 @@ class _DashboardTabState extends State<DashboardTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 挨拶
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.health_and_safety,
-                          size: 40,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Consumer<AuthProvider>(
-                                builder: (context, authProvider, child) {
-                                  return Text(
-                                    'こんにちは、${authProvider.user?['name'] ?? 'ユーザー'}さん',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                },
-                              ),
-                              const Text(
-                                '今日も健康管理を頑張りましょう！',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(16.0),
+              //   child: Card(
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(16.0),
+              //       child: Row(
+              //         children: [
+              //           const Icon(
+              //             Icons.health_and_safety,
+              //             size: 40,
+              //             color: Colors.blue,
+              //           ),
+              //           const SizedBox(width: 16),
+              //           Expanded(
+              //             child: Column(
+              //               crossAxisAlignment: CrossAxisAlignment.start,
+              //               children: [
+              //                 Consumer<AuthProvider>(
+              //                   builder: (context, authProvider, child) {
+              //                     return Text(
+              //                       'こんにちは、${authProvider.user?['name'] ?? 'ユーザー'}さん',
+              //                       style: const TextStyle(
+              //                         fontSize: 18,
+              //                         fontWeight: FontWeight.bold,
+              //                       ),
+              //                     );
+              //                   },
+              //                 ),
+              //                 const Text(
+              //                   '今日も健康管理を頑張りましょう！',
+              //                   style: TextStyle(color: Colors.grey),
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
               // 週間カレンダー
               Padding(
