@@ -149,7 +149,7 @@ class ApiService {
   /// 成功時はユーザー情報を含むMapを返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> getUserProfile(String token) async {
-    final endpoint = '$baseUrl/userinfo/';
+    final endpoint = '$baseUrl/userinfo-standard/';
     
     try {
       _debugLog('GET', endpoint);
@@ -306,15 +306,22 @@ class ApiService {
   /// 成功時は追加されたカロリー記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addCalorieRecord(String token, Map<String, dynamic> data) async {
-    // トークンからユーザーIDを取得
+    // ユーザー情報を取得
     final userInfo = await getUserProfile(token);
     final userId = userInfo['user_id'];
     
-    // ユーザーIDを含めたエンドポイントを構築
-    final endpoint = '$baseUrl/calorie-records/$userId/';
+    // バックエンドのフィールド名に合わせてデータを変換
+    final requestData = {
+      'user': userId,
+      'recorded_at': data['date'], // date → recorded_at
+      'calorie': data['calories'], // calories → calorie
+      if (data['description'] != null) 'category': data['description'], // description → category
+    };
+    
+    final endpoint = '$baseUrl/calorie-records/';
     
     try {
-      _debugLog('POST', endpoint, requestData: data);
+      _debugLog('POST', endpoint, requestData: requestData);
       
       final response = await http.post(
         Uri.parse(endpoint),
@@ -322,7 +329,7 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(data),
+        body: jsonEncode(requestData),
       );
 
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
@@ -389,15 +396,22 @@ class ApiService {
   /// 成功時は追加された体重記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addWeightRecord(String token, Map<String, dynamic> data) async {
-    // トークンからユーザーIDを取得
+    // ユーザー情報を取得
     final userInfo = await getUserProfile(token);
     final userId = userInfo['user_id'];
     
-    // ユーザーIDを含めたエンドポイントを構築
-    final endpoint = '$baseUrl/weight-records/$userId/';
+    // バックエンドのフィールド名に合わせてデータを変換
+    final requestData = {
+      'user': userId,
+      'recorded_at': data['date'], // date → recorded_at
+      'weight': data['weight'],
+      if (data['notes'] != null) 'notes': data['notes'],
+    };
+    
+    final endpoint = '$baseUrl/weight-records/';
     
     try {
-      _debugLog('POST', endpoint, requestData: data);
+      _debugLog('POST', endpoint, requestData: requestData);
       
       final response = await http.post(
         Uri.parse(endpoint),
@@ -405,7 +419,7 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(data),
+        body: jsonEncode(requestData),
       );
 
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
@@ -472,15 +486,23 @@ class ApiService {
   /// 成功時は追加された睡眠記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addSleepRecord(String token, Map<String, dynamic> data) async {
-    // トークンからユーザーIDを取得
+    // ユーザー情報を取得
     final userInfo = await getUserProfile(token);
     final userId = userInfo['user_id'];
     
-    // ユーザーIDを含めたエンドポイントを構築
-    final endpoint = '$baseUrl/sleep-records/$userId/';
+    // バックエンドのフィールド名に合わせてデータを変換
+    final requestData = {
+      'user': userId,
+      'recorded_at': data['date'], // date → recorded_at
+      'sleep_time': data['hours'], // hours → sleep_time
+      if (data['quality'] != null) 'quality': data['quality'],
+      if (data['notes'] != null) 'notes': data['notes'],
+    };
+    
+    final endpoint = '$baseUrl/sleep-records/';
     
     try {
-      _debugLog('POST', endpoint, requestData: data);
+      _debugLog('POST', endpoint, requestData: requestData);
       
       final response = await http.post(
         Uri.parse(endpoint),
@@ -488,7 +510,7 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(data),
+        body: jsonEncode(requestData),
       );
 
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
@@ -555,15 +577,24 @@ class ApiService {
   /// 成功時は追加された運動記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addExerciseRecord(String token, Map<String, dynamic> data) async {
-    // トークンからユーザーIDを取得
+    // ユーザー情報を取得
     final userInfo = await getUserProfile(token);
     final userId = userInfo['user_id'];
     
-    // ユーザーIDを含めたエンドポイントを構築
-    final endpoint = '$baseUrl/exercise-records/$userId/';
+    // バックエンドのフィールド名に合わせてデータを変換
+    final requestData = {
+      'user': userId,
+      'recorded_at': data['date'], // date → recorded_at
+      'exercise_type': data['exercise_type'], // exercise_type
+      'duration': data['duration'], // duration
+      if (data['calories'] != null) 'calories': data['calories'],
+      if (data['notes'] != null) 'notes': data['notes'],
+    };
+    
+    final endpoint = '$baseUrl/exercise-records/';
     
     try {
-      _debugLog('POST', endpoint, requestData: data);
+      _debugLog('POST', endpoint, requestData: requestData);
       
       final response = await http.post(
         Uri.parse(endpoint),
@@ -571,7 +602,7 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(data),
+        body: jsonEncode(requestData),
       );
 
       _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
