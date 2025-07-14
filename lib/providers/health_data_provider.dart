@@ -71,19 +71,18 @@ class HealthDataProvider with ChangeNotifier {
   ///
   /// [token] 認証トークン
   ///
-  /// APIから各種健康データ（カロリー、体重、睡眠、運動）を並行して取得します。
+  /// APIから各種健康データ（カロリー、体重、睡眠）を並行して取得します。
   Future<void> loadHealthData(String token) async {
     _debugLog('健康データ読み込み開始');
     _isLoading = true;
     notifyListeners();
 
     try {
-      // 各種健康データを並行して取得
+      // 各種健康データを並行して取得（運動記録は除外）
       final results = await Future.wait([
         _apiService.getCalorieRecords(token),
         _apiService.getWeightRecords(token),
         _apiService.getSleepRecords(token),
-        _apiService.getExerciseRecords(token),
       ]);
 
       _calorieRecords = (results[0] as List)
@@ -95,14 +94,14 @@ class HealthDataProvider with ChangeNotifier {
       _sleepRecords = (results[2] as List)
           .map((json) => SleepRecord.fromJson(json))
           .toList();
-      _exerciseRecords = (results[3] as List)
-          .map((json) => ExerciseRecord.fromJson(json))
-          .toList();
+      
+      // 運動記録は空のリストで初期化
+      _exerciseRecords = [];
 
       _isLoading = false;
       notifyListeners();
       _debugLog('健康データ読み込み成功', 
-        details: 'カロリー: ${_calorieRecords.length}件, 体重: ${_weightRecords.length}件, 睡眠: ${_sleepRecords.length}件, 運動: ${_exerciseRecords.length}件');
+        details: 'カロリー: ${_calorieRecords.length}件, 体重: ${_weightRecords.length}件, 睡眠: ${_sleepRecords.length}件');
     } catch (e) {
       _isLoading = false;
       notifyListeners();

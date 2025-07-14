@@ -27,9 +27,9 @@ class CalorieRecord {
   factory CalorieRecord.fromJson(Map<String, dynamic> json) {
     return CalorieRecord(
       id: json['id'],
-      date: DateTime.parse(json['date']),
-      calories: json['calories'].toDouble(),
-      description: json['description'],
+      date: DateTime.parse(json['recorded_at'] ?? json['date'] ?? DateTime.now().toIso8601String()),
+      calories: (json['calorie'] ?? json['calories'] ?? 0).toDouble(),
+      description: json['category'] ?? json['description'],
     );
   }
 
@@ -75,8 +75,8 @@ class WeightRecord {
   factory WeightRecord.fromJson(Map<String, dynamic> json) {
     return WeightRecord(
       id: json['id'],
-      date: DateTime.parse(json['date']),
-      weight: json['weight'].toDouble(),
+      date: DateTime.parse(json['recorded_at'] ?? json['date'] ?? DateTime.now().toIso8601String()),
+      weight: (json['weight'] ?? 0).toDouble(),
       notes: json['notes'],
     );
   }
@@ -127,8 +127,8 @@ class SleepRecord {
   factory SleepRecord.fromJson(Map<String, dynamic> json) {
     return SleepRecord(
       id: json['id'],
-      date: DateTime.parse(json['date']),
-      hours: json['hours'].toDouble(),
+      date: DateTime.parse(json['recorded_at'] ?? json['date'] ?? DateTime.now().toIso8601String()),
+      hours: (json['sleep_time'] ?? json['hours'] ?? 0).toDouble(),
       quality: json['quality'],
       notes: json['notes'],
     );

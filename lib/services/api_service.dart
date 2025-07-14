@@ -21,7 +21,8 @@ class ApiService {
   /// [statusCode] レスポンスのステータスコード（任意）
   /// [responseBody] レスポンスのボディ（任意）
   /// [error] エラー情報（任意）
-  static void _debugLog(String method, String endpoint, {Map<String, dynamic>? requestData, int? statusCode, String? responseBody, String? error}) {
+  /// [details] 詳細情報（任意）
+  static void _debugLog(String method, String endpoint, {Map<String, dynamic>? requestData, int? statusCode, String? responseBody, String? error, String? details}) {
     print('=== API Debug Log ===');
     print('環境: ${Environment.currentEnvironment}');
     print('メソッド: $method');
@@ -37,6 +38,9 @@ class ApiService {
     }
     if (error != null) {
       print('エラー: $error');
+    }
+    if (details != null) {
+      print('詳細: $details');
     }
     print('==================');
   }
@@ -531,95 +535,24 @@ class ApiService {
     }
   }
 
-  /// 運動記録を取得するメソッド
+  /// 運動記録を取得するメソッド（現在は空のリストを返す）
   ///
   /// [token] 認証トークン
   ///
-  /// 成功時は運動記録のリストを返します。
-  /// 失敗時は例外をスローします。
+  /// 運動記録機能は未実装のため、空のリストを返します。
   Future<List<dynamic>> getExerciseRecords(String token) async {
-    final endpoint = '$baseUrl/exercise-records/';
-    
-    try {
-      _debugLog('GET', endpoint);
-      
-      final response = await http.get(
-        Uri.parse(endpoint),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      _debugLog('GET', endpoint, statusCode: response.statusCode, responseBody: response.body);
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        print('運動記録取得成功: ${result.length}件');
-        return result;
-      } else {
-        final errorMessage = '運動記録の取得に失敗しました (ステータス: ${response.statusCode})';
-        _debugLog('GET', endpoint, error: errorMessage);
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      final errorMessage = '運動記録取得処理でエラーが発生しました: $e';
-      _debugLog('GET', endpoint, error: errorMessage);
-      throw Exception(errorMessage);
-    }
+    _debugLog('GET', 'exercise-records (未実装)', details: '空のリストを返します');
+    return [];
   }
 
-  /// 運動記録を追加するメソッド
+  /// 運動記録を追加するメソッド（現在は未実装）
   ///
   /// [token] 認証トークン
   /// [data] 追加する運動記録データ
   ///
-  /// 成功時は追加された運動記録を返します。
-  /// 失敗時は例外をスローします。
+  /// 運動記録機能は未実装のため、例外をスローします。
   Future<Map<String, dynamic>> addExerciseRecord(String token, Map<String, dynamic> data) async {
-    // ユーザー情報を取得
-    final userInfo = await getUserProfile(token);
-    final userId = userInfo['user_id'];
-    
-    // バックエンドのフィールド名に合わせてデータを変換
-    final requestData = {
-      'user': userId,
-      'recorded_at': data['date'], // date → recorded_at
-      'exercise_type': data['exercise_type'], // exercise_type
-      'duration': data['duration'], // duration
-      if (data['calories'] != null) 'calories': data['calories'],
-      if (data['notes'] != null) 'notes': data['notes'],
-    };
-    
-    final endpoint = '$baseUrl/exercise-records/';
-    
-    try {
-      _debugLog('POST', endpoint, requestData: requestData);
-      
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(requestData),
-      );
-
-      _debugLog('POST', endpoint, statusCode: response.statusCode, responseBody: response.body);
-
-      if (response.statusCode == 201) {
-        final result = jsonDecode(response.body);
-        print('運動記録追加成功');
-        return result;
-      } else {
-        final errorMessage = '運動記録の追加に失敗しました (ステータス: ${response.statusCode})';
-        _debugLog('POST', endpoint, error: errorMessage);
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      final errorMessage = '運動記録追加処理でエラーが発生しました: $e';
-      _debugLog('POST', endpoint, error: errorMessage);
-      throw Exception(errorMessage);
-    }
+    _debugLog('POST', 'exercise-records (未実装)', error: '運動記録機能は未実装です');
+    throw Exception('運動記録機能は未実装です');
   }
 }
