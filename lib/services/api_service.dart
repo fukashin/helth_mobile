@@ -306,7 +306,12 @@ class ApiService {
   /// 成功時は追加されたカロリー記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addCalorieRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/calorie-records/';
+    // トークンからユーザーIDを取得
+    final userInfo = await getUserProfile(token);
+    final userId = userInfo['user_id'];
+    
+    // ユーザーIDを含めたエンドポイントを構築
+    final endpoint = '$baseUrl/calorie-records/$userId/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -384,7 +389,12 @@ class ApiService {
   /// 成功時は追加された体重記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addWeightRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/weight-records/';
+    // トークンからユーザーIDを取得
+    final userInfo = await getUserProfile(token);
+    final userId = userInfo['user_id'];
+    
+    // ユーザーIDを含めたエンドポイントを構築
+    final endpoint = '$baseUrl/weight-records/$userId/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -462,7 +472,12 @@ class ApiService {
   /// 成功時は追加された睡眠記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addSleepRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/sleep-records/';
+    // トークンからユーザーIDを取得
+    final userInfo = await getUserProfile(token);
+    final userId = userInfo['user_id'];
+    
+    // ユーザーIDを含めたエンドポイントを構築
+    final endpoint = '$baseUrl/sleep-records/$userId/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
@@ -540,7 +555,12 @@ class ApiService {
   /// 成功時は追加された運動記録を返します。
   /// 失敗時は例外をスローします。
   Future<Map<String, dynamic>> addExerciseRecord(String token, Map<String, dynamic> data) async {
-    final endpoint = '$baseUrl/exercise-records/';
+    // トークンからユーザーIDを取得
+    final userInfo = await getUserProfile(token);
+    final userId = userInfo['user_id'];
+    
+    // ユーザーIDを含めたエンドポイントを構築
+    final endpoint = '$baseUrl/exercise-records/$userId/';
     
     try {
       _debugLog('POST', endpoint, requestData: data);
