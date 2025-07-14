@@ -194,7 +194,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.register(email, password);
+      final response = await _apiService.register(email, password, name: name);
 
       if (response != false) {
         _debugLog('ユーザー登録成功', details: 'ユーザー: $email, トークンを取得しました');

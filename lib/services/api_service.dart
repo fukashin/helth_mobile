@@ -93,12 +93,17 @@ class ApiService {
   ///
   /// [email] ユーザーのメールアドレス
   /// [password] ユーザーのパスワード
+  /// [name] ユーザーの名前（オプション）
   ///
   /// 成功時はトークンとユーザー情報を含むMapを返します。
   /// 失敗時はfalseを返します。
-  Future<dynamic> register(String email, String password) async {
+  Future<dynamic> register(String email, String password, {String? name}) async {
     final endpoint = '$baseUrl/register/';
-    final requestData = {'email': email, 'password': password};
+    final requestData = {
+      'email': email, 
+      'password': password,
+      if (name != null) 'name': name
+    };
     
     try {
       _debugLog('POST', endpoint, requestData: requestData);

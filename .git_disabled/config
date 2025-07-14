@@ -1,0 +1,23 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/fukashin/helth_mobile.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[branch "mobile_1"]
+	vscode-merge-base = origin/main
+	remote = origin
+	merge = refs/heads/mobile_1
+[branch "データのPOSTを追加_1"]
+	vscode-merge-base = origin/mobile_1
+	remote = origin
+	merge = refs/heads/データのPOSTを追加_1
+[branch "データの入力作成"]
+	vscode-merge-base = origin/main

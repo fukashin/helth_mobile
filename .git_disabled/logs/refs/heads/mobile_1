@@ -1,0 +1,9 @@
+0000000000000000000000000000000000000000 d6078a29dfe136e94b5c969dcb1678151e15ad95 fukashin <55280398+fukashin@users.noreply.github.com> 1750567577 +0900	branch: Created from HEAD
+d6078a29dfe136e94b5c969dcb1678151e15ad95 00dbf7f9c9827d3d487d2ed6ba7276a8a13dc587 fukashin <55280398+fukashin@users.noreply.github.com> 1750569023 +0900	commit: いったん返還
+00dbf7f9c9827d3d487d2ed6ba7276a8a13dc587 73b7fcd9816a0b41d7de2a8fb480558c86ae1945 fukashin <55280398+fukashin@users.noreply.github.com> 1750578217 +0900	commit: dockerファイル作成
+73b7fcd9816a0b41d7de2a8fb480558c86ae1945 a228e5fabac72bff009f9d895a7db00b394d9d01 fukashin <55280398+fukashin@users.noreply.github.com> 1750583609 +0900	commit: userinfoにアクセスするように修正
+a228e5fabac72bff009f9d895a7db00b394d9d01 853ca12760426ee14e799ee4f173b8e87c1d0010 fukashin <55280398+fukashin@users.noreply.github.com> 1750584296 +0900	commit: ユーザー登録処理の修正
+853ca12760426ee14e799ee4f173b8e87c1d0010 5e988148aede2b12cec3e38fd8e7254c60ad4628 fukashin <55280398+fukashin@users.noreply.github.com> 1750687934 +0900	commit: add:環境度とにURLを切り替える処理を追加
+5e988148aede2b12cec3e38fd8e7254c60ad4628 96986c027fb4461b3b3d4d48a69582bd1a4decf4 fukashin <55280398+fukashin@users.noreply.github.com> 1750691190 +0900	commit: エミュレーターのログが出るように修正
+96986c027fb4461b3b3d4d48a69582bd1a4decf4 e934a158c818ca3496be574c2398a04e3c890dcc fukashin <55280398+fukashin@users.noreply.github.com> 1752348042 +0900	commit: add:プロジェクト概要とブラウザの起動
+e934a158c818ca3496be574c2398a04e3c890dcc 3c527d11fbce9fba005336d61fbeaef1f224bf09 fukashin <55280398+fukashin@users.noreply.github.com> 1752399834 +0900	commit: トークンの受け取り
