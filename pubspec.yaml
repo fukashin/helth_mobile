@@ -64,6 +64,9 @@ dependencies:
   
   # 権限管理用
   permission_handler: ^11.3.1
+  
+  # iOS HealthKit用
+  health: ^10.2.0
 
 dev_dependencies:
   flutter_test:

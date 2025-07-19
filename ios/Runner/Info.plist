@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMotionUsageDescription</key>
+	<string>このアプリは歩数を計測するためにモーションセンサーを使用します。</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>このアプリは歩数データを読み取るためにHealthKitを使用します。</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>このアプリは歩数データを更新するためにHealthKitを使用します。</string>
 </dict>
 </plist>

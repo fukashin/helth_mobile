@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:health/health.dart';
 import 'dart:async';
+import 'dart:io';
 
 /// 歩数計測画面
 ///
@@ -22,6 +25,10 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
   bool _isPermissionGranted = false;
   bool _isLoading = true;
   String _errorMessage = '';
+
+  // iOS HealthKit用
+  Health _health = Health();
+  Timer? _healthTimer;
 
   @override
   void initState() {
@@ -49,16 +56,27 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
   /// 必要な権限の要求
   Future<void> _requestPermissions() async {
     try {
-      // Android 10以上では身体活動認識権限が必要
-      final status = await Permission.activityRecognition.request();
-
-      setState(() {
-        _isPermissionGranted = status.isGranted;
-        if (!_isPermissionGranted) {
-          _errorMessage = '歩数計測には身体活動認識の権限が必要です。設定から権限を許可してください。';
-        }
-        _isLoading = false;
-      });
+      if (Platform.isIOS) {
+        // iOS用のHealthKit権限要求
+        await _requestHealthKitPermissions();
+      } else if (Platform.isAndroid) {
+        // Android用の身体活動認識権限要求
+        final status = await Permission.activityRecognition.request();
+        setState(() {
+          _isPermissionGranted = status.isGranted;
+          if (!_isPermissionGranted) {
+            _errorMessage = '歩数計測には身体活動認識の権限が必要です。設定から権限を許可してください。';
+          }
+          _isLoading = false;
+        });
+      } else {
+        // その他のプラットフォーム（Web、デスクトップなど）
+        setState(() {
+          _isPermissionGranted = false;
+          _errorMessage = 'このプラットフォームでは歩数計測はサポートされていません。';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isPermissionGranted = false;
@@ -68,8 +86,57 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
     }
   }
 
+  /// iOS HealthKit権限要求
+  Future<void> _requestHealthKitPermissions() async {
+    try {
+      final types = [HealthDataType.STEPS];
+      final permissions = [HealthDataAccess.READ];
+
+      final granted = await _health.requestAuthorization(
+        types,
+        permissions: permissions,
+      );
+
+      setState(() {
+        _isPermissionGranted = granted;
+        if (!_isPermissionGranted) {
+          _errorMessage = 'HealthKitへのアクセス権限が必要です。設定から権限を許可してください。';
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isPermissionGranted = false;
+        _errorMessage = 'HealthKit権限の確認に失敗しました: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
   /// ストリームの初期化
   void _initStreams() {
+    try {
+      if (Platform.isIOS) {
+        // iOS用のHealthKit実装
+        _initHealthKitStreams();
+      } else if (Platform.isAndroid) {
+        // Android用のPedometer実装
+        _initPedometerStreams();
+      } else {
+        // その他のプラットフォーム
+        _startMockData();
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'センサーの初期化に失敗しました: $e';
+        // エラー時は模擬データを使用
+        _startMockData();
+      });
+    }
+  }
+
+  /// Android用Pedometerストリーム初期化
+  void _initPedometerStreams() {
     try {
       _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
       _stepCountStream = Pedometer.stepCountStream;
@@ -84,11 +151,81 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
       _stepCountStream.listen(_onStepCount, onError: _onStepCountError);
     } catch (e) {
       setState(() {
-        _errorMessage = 'センサーの初期化に失敗しました: $e';
-        // エミュレーター環境では模擬データを使用
+        _errorMessage = 'Pedometerの初期化に失敗しました: $e';
         _startMockData();
       });
     }
+  }
+
+  /// iOS用HealthKitストリーム初期化
+  void _initHealthKitStreams() {
+    try {
+      // HealthKitから歩数データを定期的に取得
+      _startHealthKitTimer();
+      setState(() {
+        _status = 'HealthKit接続中';
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'HealthKitの初期化に失敗しました: $e';
+        _startMockData();
+      });
+    }
+  }
+
+  /// HealthKit用タイマー開始
+  void _startHealthKitTimer() {
+    _healthTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      await _fetchHealthKitSteps();
+    });
+    // 初回実行
+    _fetchHealthKitSteps();
+  }
+
+  /// HealthKitから歩数データを取得
+  Future<void> _fetchHealthKitSteps() async {
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+
+      final healthData = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.STEPS],
+        startTime: startOfDay,
+        endTime: now,
+      );
+
+      if (healthData.isNotEmpty) {
+        int totalSteps = 0;
+        for (var data in healthData) {
+          if (data.value is NumericHealthValue) {
+            totalSteps += (data.value as NumericHealthValue).numericValue
+                .toInt();
+          }
+        }
+
+        setState(() {
+          _steps = totalSteps.toString();
+          _status = 'HealthKit接続済み';
+          _errorMessage = '';
+        });
+      } else {
+        setState(() {
+          _steps = '0';
+          _status = 'データなし';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'HealthKitデータの取得に失敗しました: $e';
+        _startMockData();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _healthTimer?.cancel();
+    super.dispose();
   }
 
   /// エミュレーター用の模擬データ開始
