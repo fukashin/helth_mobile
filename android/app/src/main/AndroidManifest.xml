@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- インターネット接続権限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application
         android:label="health_app"
         android:name="${applicationName}"

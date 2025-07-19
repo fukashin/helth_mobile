@@ -55,6 +55,9 @@ dependencies:
   
   # アイコン用
   font_awesome_flutter: ^10.6.0
+  
+  # Google Sign-In用
+  google_sign_in: ^6.1.5
 
 dev_dependencies:
   flutter_test:

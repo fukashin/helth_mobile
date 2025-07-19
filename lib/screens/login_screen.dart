@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
@@ -40,6 +40,21 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    final success = await authProvider.signInWithGoogle();
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Googleサインインに失敗しました。もう一度お試しください。'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -79,10 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 const Text(
                   'あなたの健康をサポートします',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 48),
 
@@ -167,9 +179,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           Consumer<AuthProvider>(
                             builder: (context, authProvider, child) {
                               return ElevatedButton(
-                                onPressed: authProvider.isLoading ? null : _login,
+                                onPressed: authProvider.isLoading
+                                    ? null
+                                    : _login,
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -180,13 +196,81 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : const Text(
                                         'ログイン',
                                         style: TextStyle(fontSize: 16),
                                       ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 区切り線
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Text(
+                                  'または',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Google Sign-Inボタン
+                          Consumer<AuthProvider>(
+                            builder: (context, authProvider, child) {
+                              return OutlinedButton.icon(
+                                onPressed: authProvider.isLoading
+                                    ? null
+                                    : _signInWithGoogle,
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  side: const BorderSide(color: Colors.grey),
+                                ),
+                                icon: authProvider.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Image.network(
+                                        'https://developers.google.com/identity/images/g-logo.png',
+                                        height: 20,
+                                        width: 20,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return const Icon(
+                                                Icons.account_circle,
+                                                size: 20,
+                                                color: Colors.grey,
+                                              );
+                                            },
+                                      ),
+                                label: const Text(
+                                  'Googleでサインイン',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
                               );
                             },
                           ),
