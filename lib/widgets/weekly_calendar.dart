@@ -267,28 +267,33 @@ class _WeeklyCalendarState extends State<WeeklyCalendar>
   /// 週の日付表示部分を構築するメソッド
   ///
   /// [weekDays] 表示する週の日付リスト
+  ///
+  /// カレンダーを7等分し、各セクションの中心に日付を配置します。
+  /// これにより、どのデバイスサイズでも正確な位置にアニメーションします。
   Widget _buildWeekDays(List<DateTime> weekDays) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
-        List<GlobalKey> _dayKeys = List.generate(7, (_) => GlobalKey());
+        final itemWidth = availableWidth / 7; // 7等分
+        final selectorWidth = 40.0;
 
-        final itemWidth = availableWidth / 7;
-        final double selectorWidth = 40;
-        final itemCenterOffset = (itemWidth - selectorWidth) / 2;
         return Stack(
           children: [
             // 選択された日付の背景（アニメーション）
             AnimatedBuilder(
               animation: _selectionPositionAnimation,
               builder: (context, child) {
+                // 各セクションの中心位置を計算
+                final centerX =
+                    (_selectionPositionAnimation.value * itemWidth) +
+                    (itemWidth / 2);
+                final left = centerX - (selectorWidth / 2);
+
                 return Positioned(
-                  left:
-                      (_selectionPositionAnimation.value * itemWidth) +
-                      itemCenterOffset,
+                  left: left,
                   top: 0,
                   child: Container(
-                    width: 40,
+                    width: selectorWidth,
                     height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -298,9 +303,8 @@ class _WeeklyCalendarState extends State<WeeklyCalendar>
                 );
               },
             ),
-            // 日付のRow
+            // 日付を7等分のセクションに配置
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(7, (index) {
                 final date = weekDays[index];
                 final isToday =
@@ -315,55 +319,71 @@ class _WeeklyCalendarState extends State<WeeklyCalendar>
                 // 曜日の日本語表記（月曜日から日曜日）
                 final weekdayJp = ['月', '火', '水', '木', '金', '土', '日'][index];
 
-                return GestureDetector(
-                  onTap: () => _selectDate(date, index),
-                  child: Container(
-                    width: 40,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent, // 背景は透明にして、アニメーション背景を使用
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          date.day.toString(),
-                          style: TextStyle(
-                            color: isSelected ? Colors.green : Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                return SizedBox(
+                  width: itemWidth, // 各セクションの幅を7等分
+                  height: 60,
+                  child: GestureDetector(
+                    onTap: () => _selectDate(date, index),
+                    child: Container(
+                      width: itemWidth,
+                      height: 60,
+                      color: Colors.transparent,
+                      child: Center(
+                        // 各セクションの中心に配置
+                        child: Container(
+                          width: selectorWidth,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          weekdayJp,
-                          style: TextStyle(
-                            color: isSelected ? Colors.green : Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                        if (isToday && !isSelected)
-                          Container(
-                            margin: const EdgeInsets.only(top: 2),
-                            width: 24,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '今日',
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                date.day.toString(),
                                 style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 8,
+                                  color: isSelected
+                                      ? Colors.green
+                                      : Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 4),
+                              Text(
+                                weekdayJp,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.green
+                                      : Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              if (isToday && !isSelected)
+                                Container(
+                                  margin: const EdgeInsets.only(top: 2),
+                                  width: 24,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      '今日',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                      ],
+                        ),
+                      ),
                     ),
                   ),
                 );
