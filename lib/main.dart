@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/step_counter_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/health_data_provider.dart';
 import 'config/environment.dart';
@@ -20,7 +21,7 @@ void main() {
   // 環境設定の初期化
   // コマンドライン引数から環境を取得（デフォルトは開発環境）
   final env = const String.fromEnvironment('ENV', defaultValue: 'dev');
-  
+
   // 環境に応じて適切な設定を行う
   switch (env) {
     case 'prod':
@@ -32,10 +33,10 @@ void main() {
     default:
       Environment.setEnvironment(Environment.dev);
   }
-  
+
   // 環境情報をデバッグ出力
   Environment.printEnvironmentInfo();
-  
+
   runApp(const HealthApp());
 }
 
@@ -51,7 +52,7 @@ class HealthApp extends StatelessWidget {
     return MultiProvider(
       // 状態管理のためのプロバイダーを設定
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),      // 認証状態の管理
+        ChangeNotifierProvider(create: (_) => AuthProvider()), // 認証状態の管理
         ChangeNotifierProvider(create: (_) => HealthDataProvider()), // 健康データの管理
       ],
       child: MaterialApp(
@@ -74,33 +75,8 @@ class HealthApp extends StatelessWidget {
             ),
           ),
         ),
-        // 認証状態に基づいて表示する画面を切り替え
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, child) {
-            // 初期化が完了していない場合はローディング画面を表示
-            if (!authProvider.isInitialized) {
-              return const Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('読み込み中...', style: TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ),
-              );
-            }
-            
-            // 初期化完了後、認証状態に基づいて画面を切り替え
-            if (authProvider.isAuthenticated) {
-              return const HomeScreen(); // 認証済みの場合はホーム画面
-            } else {
-              return const LoginScreen(); // 未認証の場合はログイン画面
-            }
-          },
-        ),
+        // 起動時に歩数計画面を直接表示
+        home: const StepCounterScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );

@@ -55,6 +55,15 @@ dependencies:
   
   # アイコン用
   font_awesome_flutter: ^10.6.0
+  
+  # Google Sign-In用
+  google_sign_in: ^6.1.5
+  
+  # 歩数計測用
+  pedometer: ^4.0.1
+  
+  # 権限管理用
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

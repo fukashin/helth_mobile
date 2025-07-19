@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
+import '../services/google_auth_service.dart';
 
 /// 認証状態管理プロバイダー
 ///
@@ -9,42 +11,45 @@ import '../services/api_service.dart';
 class AuthProvider with ChangeNotifier {
   /// ユーザーが認証されているかどうか
   bool _isAuthenticated = false;
-  
+
   /// 認証トークン
   String? _token;
-  
+
   /// ユーザー情報
   Map<String, dynamic>? _user;
-  
+
   /// ユーザーID
   int? _userId;
-  
+
   /// 処理中かどうか（ログイン中、登録中など）
   bool _isLoading = false;
-  
+
   /// 初期化が完了したかどうか
   bool _isInitialized = false;
 
   /// ユーザーが認証されているかどうかを取得
   bool get isAuthenticated => _isAuthenticated;
-  
+
   /// 認証トークンを取得
   String? get token => _token;
-  
+
   /// ユーザー情報を取得
   Map<String, dynamic>? get user => _user;
-  
+
   /// ユーザーIDを取得
   int? get userId => _userId;
-  
+
   /// 処理中かどうかを取得
   bool get isLoading => _isLoading;
-  
+
   /// 初期化が完了したかどうかを取得
   bool get isInitialized => _isInitialized;
 
   /// APIサービスのインスタンス
   final ApiService _apiService = ApiService();
+
+  /// Google認証サービスのインスタンス
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   /// デバッグ用のログ出力メソッド
   ///
@@ -92,7 +97,11 @@ class AuthProvider with ChangeNotifier {
         try {
           await _loadUserInfo();
         } catch (e) {
-          _debugLog('ユーザー情報取得エラー', error: e.toString(), details: 'トークンは保持したまま続行します');
+          _debugLog(
+            'ユーザー情報取得エラー',
+            error: e.toString(),
+            details: 'トークンは保持したまま続行します',
+          );
           // ユーザー情報取得に失敗しても、トークンがあれば認証状態を維持
           _isAuthenticated = true;
         }
@@ -120,7 +129,7 @@ class AuthProvider with ChangeNotifier {
       _debugLog('ユーザー情報取得開始');
       final userInfo = await _apiService.getUserProfile(_token!);
       _user = userInfo;
-      
+
       // ユーザーIDを取得して保存
       if (_user != null && _user!['id'] != null) {
         _userId = _user!['id'];
@@ -129,7 +138,7 @@ class AuthProvider with ChangeNotifier {
         await prefs.setInt('user_id', _userId!);
         _debugLog('ユーザーID取得成功', details: 'ユーザーID: $_userId');
       }
-      
+
       _debugLog('ユーザー情報取得成功', details: 'ユーザー: ${_user!['email'] ?? "不明"}');
     } catch (e) {
       _debugLog('ユーザー情報取得失敗', error: e.toString(), details: 'APIリクエストに失敗しました');
@@ -159,7 +168,7 @@ class AuthProvider with ChangeNotifier {
       if (_user != null && _user!['id'] != null) {
         _userId = _user!['id'];
       }
-      
+
       // トークンとユーザーIDを保存
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', _token!);
@@ -194,11 +203,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.register(email, password);
+      final response = await _apiService.register(email, password, name: name);
 
       if (response != false) {
         _debugLog('ユーザー登録成功', details: 'ユーザー: $email, トークンを取得しました');
-        
+
         // レスポンスからトークンとユーザー情報を取得
         _token = response['access_token'];
         _user = response['user'];
@@ -208,7 +217,7 @@ class AuthProvider with ChangeNotifier {
         if (_user != null && _user!['id'] != null) {
           _userId = _user!['id'];
         }
-        
+
         // トークンとユーザーIDを保存
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
@@ -235,12 +244,80 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Google Sign-Inでログイン処理を行うメソッド
+  ///
+  /// Google認証を使用してログインを行います。
+  /// 成功時はtrueを、失敗時はfalseを返します。
+  Future<bool> signInWithGoogle() async {
+    _debugLog('Google Sign-Inログイン開始');
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Googleサインインを実行
+      final GoogleSignInAccount? googleUser = await _googleAuthService
+          .signInWithGoogle();
+
+      if (googleUser == null) {
+        _isLoading = false;
+        notifyListeners();
+        _debugLog('Google Sign-Inキャンセル', details: 'ユーザーがサインインをキャンセルしました');
+        return false;
+      }
+
+      // Googleユーザー情報を取得
+      final googleUserInfo = _googleAuthService.getUserInfo(googleUser);
+
+      // IDトークンを取得
+      final String? idToken = await _googleAuthService.getIdToken(googleUser);
+
+      if (idToken == null) {
+        _isLoading = false;
+        notifyListeners();
+        _debugLog('Google IDトークン取得失敗');
+        return false;
+      }
+
+      // バックエンドでGoogle認証を処理（今回はテスト実装のため、ローカルで認証状態を設定）
+      // 実際の実装では、IDトークンをバックエンドに送信して検証し、JWTトークンを取得する
+      _token = 'google_sso_token_${googleUser.id}'; // テスト用のトークン
+      _user = {
+        'id': googleUser.id.hashCode, // テスト用のユーザーID
+        'email': googleUser.email,
+        'name': googleUser.displayName ?? googleUser.email,
+        'auth_type': 'google_sso',
+      };
+      _userId = googleUser.id.hashCode;
+      _isAuthenticated = true;
+
+      // トークンとユーザーIDを保存
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', _token!);
+      await prefs.setInt('user_id', _userId!);
+      await prefs.setString('auth_type', 'google_sso');
+
+      _isLoading = false;
+      notifyListeners();
+      _debugLog('Google Sign-Inログイン成功', details: 'ユーザー: ${googleUser.email}');
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      _debugLog('Google Sign-Inログインエラー', error: e.toString());
+      return false;
+    }
+  }
+
   /// ログアウト処理を行うメソッド
   ///
   /// 認証状態をクリアし、保存されたトークンを削除します。
+  /// Google Sign-Inの場合はGoogleからもサインアウトします。
   Future<void> logout() async {
     _debugLog('ログアウト開始');
     try {
+      // Google Sign-Inからサインアウト
+      await _googleAuthService.signOut();
+
       _isAuthenticated = false;
       _token = null;
       _user = null;
@@ -250,6 +327,7 @@ class AuthProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_token');
       await prefs.remove('user_id');
+      await prefs.remove('auth_type');
 
       notifyListeners();
       _debugLog('ログアウト完了', details: 'トークン、ユーザー情報、ユーザーIDを削除しました');
